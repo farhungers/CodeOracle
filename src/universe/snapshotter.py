@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from typing import Iterable
 
 from src.ingest.dexscreener import DexScreenerClient, DiscoveryHit
+from src.ingest.helius import HeliusClient
+from src.universe.survivorship import GateConfig, evaluate as gate_evaluate
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +45,12 @@ class TokenState:
     tokenized_stock: bool
     underlying_ticker: str | None
     discovery_sources: list[str] = field(default_factory=list)
+    # Helius enrichment (SOL only; None until enrich_solana runs)
+    top10_pct: float | None = None
+    holder_count: int | None = None
+    # GATE ZERO (None until survivorship runs)
+    survives_gate0: bool | None = None
+    fail_reasons: list[str] = field(default_factory=list)
 
 
 def _pick_best_pair(pairs: list[dict], chain: str) -> dict | None:
@@ -135,6 +143,51 @@ def snapshot_chain(
     finally:
         if own:
             client.close()
+
+
+def enrich_solana(
+    states: list[TokenState],
+    helius: HeliusClient | None = None,
+) -> None:
+    """In-place: populate top10_pct + holder_count for SOL entries via Helius.
+
+    Failures per-token are logged and leave the fields as None (GATE ZERO
+    will then fail with "top10_unknown"/"holders_unknown"). Non-SOL tokens
+    are skipped silently.
+    """
+    own = helius is None
+    helius = helius or HeliusClient()
+    try:
+        for s in states:
+            if s.chain != "solana":
+                continue
+            try:
+                info = helius.holder_info(s.token_addr)
+            except Exception as e:  # transport / API layer
+                log.warning("helius holder_info %s failed: %s", s.token_addr, e)
+                continue
+            s.top10_pct = info.top10_pct
+            s.holder_count = info.holder_count
+    finally:
+        if own:
+            helius.close()
+
+
+def apply_gate_zero(states: list[TokenState], cfg: GateConfig | None = None) -> None:
+    """In-place: set survives_gate0 + fail_reasons on each state."""
+    cfg = cfg or GateConfig.from_env()
+    for s in states:
+        result = gate_evaluate(
+            liq_usd=s.liq_usd,
+            vol_24h_usd=s.vol_24h_usd,
+            mcap_usd=s.mcap_usd,
+            age_hours=s.age_hours,
+            holder_count=s.holder_count,
+            top10_pct=s.top10_pct,
+            cfg=cfg,
+        )
+        s.survives_gate0 = result.survives
+        s.fail_reasons = result.reasons
 
 
 def to_jsonable(states: list[TokenState]) -> list[dict]:

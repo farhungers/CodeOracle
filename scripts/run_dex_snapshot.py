@@ -18,7 +18,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.universe.snapshotter import snapshot_chain, to_jsonable  # noqa: E402
+from dotenv import load_dotenv  # noqa: E402
+
+load_dotenv(ROOT / ".env")
+
+from src.universe.snapshotter import (  # noqa: E402
+    apply_gate_zero,
+    enrich_solana,
+    snapshot_chain,
+    to_jsonable,
+)
 
 
 def main() -> None:
@@ -26,6 +35,7 @@ def main() -> None:
     ap.add_argument("--chain", default="solana")
     ap.add_argument("--outdir", default=str(ROOT / "research" / "first_snapshots"))
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--enrich", action="store_true", help="Helius enrichment + GATE ZERO")
     args = ap.parse_args()
 
     logging.basicConfig(
@@ -37,8 +47,13 @@ def main() -> None:
     outdir.mkdir(parents=True, exist_ok=True)
 
     states = snapshot_chain(args.chain)
+    if args.enrich:
+        if args.chain == "solana":
+            enrich_solana(states)
+        apply_gate_zero(states)
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    outfile = outdir / f"{args.chain}_{ts}.json"
+    suffix = "_enriched" if args.enrich else ""
+    outfile = outdir / f"{args.chain}{suffix}_{ts}.json"
 
     payload = {
         "snapshot_ts_utc": ts,
@@ -52,6 +67,13 @@ def main() -> None:
     xstocks = sum(1 for s in states if s.tokenized_stock)
     with_liq = sum(1 for s in states if (s.liq_usd or 0) >= 100_000)
     print(f"{args.chain}: {len(states)} tokens  ({xstocks} tokenized, {with_liq} pass $100k liq)")
+    if args.enrich:
+        survivors = sum(1 for s in states if s.survives_gate0)
+        print(f"GATE ZERO: {survivors} survive of {len(states)}")
+        from collections import Counter
+        top_reasons = Counter(r for s in states for r in s.fail_reasons)
+        for r, n in top_reasons.most_common(8):
+            print(f"  fail {r}: {n}")
     print(f"wrote {outfile}")
 
 
