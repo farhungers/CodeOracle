@@ -1,0 +1,33 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "printf '\\033[36mCodeOracle\\033[0m'"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"hookSpecificOutput\": {\"sessionTitle\": \"CodeOracle\"}}'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/*.py)",
+      "Bash(python -m src.*)",
+      "Bash(python -m pytest*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch*)",
+      "Bash(psql -d codeoracle -c *)",
+      "Bash(psql -d codeoracle -f *)"
+    ]
+  }
+}
