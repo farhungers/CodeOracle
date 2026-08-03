@@ -60,6 +60,7 @@ class E1HolderConcentration(Edge):
                 continue
 
             entry = float(s.price_usd)
+            velocity_pct = (trade_count / median_tc - 1) * 100 if median_tc else 0.0
             sig = Signal(
                 edge_code=self.code,
                 chain=s.chain,
@@ -78,6 +79,15 @@ class E1HolderConcentration(Edge):
                     f"liq=${s.liq_usd:,.0f}  vol24h=${s.vol_24h_usd:,.0f}",
                 ],
                 card_extras=self._card_extras(s),
+                thesis_narrative=(
+                    "E1 bets on Solana memes with organic distribution + active "
+                    "buying velocity — they tend to re-rate on second-wave "
+                    "interest within 72h."
+                ),
+                thesis_evidence=(
+                    f"This one's trade velocity is {velocity_pct:.0f}% above "
+                    "current cycle median — that's the trigger."
+                ),
             )
             signals.append(sig)
         return signals

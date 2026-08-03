@@ -25,6 +25,8 @@ class Signal:
     entry_window_min: int
     reasons: list[str] = field(default_factory=list)   # "WHY THIS SETUP" bullets
     card_extras: dict[str, Any] = field(default_factory=dict)   # payload for full card render
+    thesis_narrative: str = ""                          # WHY block: one-sentence thesis
+    thesis_evidence: str = ""                           # WHY block: one distinguishing evidence bullet
 
 
 class Edge(ABC):
