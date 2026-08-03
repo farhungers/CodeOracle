@@ -20,17 +20,54 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(ROOT / ".env")
 
+import os  # noqa: E402
+
 from src.audit import heartbeat  # noqa: E402
 from src.edges.e1_holder_concentration import E1HolderConcentration  # noqa: E402
 from src.signals import shadow_log  # noqa: E402
+from src.telegram import delivery_log  # noqa: E402
+from src.telegram.formatter import render_card, signal_id  # noqa: E402
+from src.telegram.sender import TelegramSender  # noqa: E402
 from src.universe.snapshotter import (  # noqa: E402
+    TokenState,
     apply_gate_zero,
     enrich_solana,
     snapshot_chain,
 )
 
 SHADOW_PATH = ROOT / "research" / "shadow_log.jsonl"
+RES_PATH = ROOT / "research" / "resolutions.jsonl"
 HB_PATH = ROOT / "research" / "heartbeat.jsonl"
+DELIVERY_PATH = ROOT / "research" / "tg_delivery.jsonl"
+
+EDGE_SHORT_NAMES = {
+    "E1": "holder concentration",
+}
+
+
+def _resolved_count_for(edge_code: str) -> int:
+    """Count of resolved (non-INVALID) rows for this edge in resolutions.jsonl."""
+    if not RES_PATH.exists():
+        return 0
+    import json as _json
+
+    n = 0
+    with RES_PATH.open("r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                row = _json.loads(line)
+            except _json.JSONDecodeError:
+                continue
+            if row.get("edge_code") == edge_code and row.get("outcome") in ("TP1", "SL", "EXPIRED"):
+                n += 1
+    return n
+
+
+def _state_for_signal(sig, states: list[TokenState]) -> TokenState | None:
+    for s in states:
+        if s.token_addr == sig.token_addr and s.chain == sig.chain:
+            return s
+    return None
 
 
 def main() -> None:
@@ -45,7 +82,8 @@ def main() -> None:
     # Quiet httpx info-level per-request logs
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    cycle_ts_utc = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    emitted_at = datetime.now(timezone.utc)
+    cycle_ts_utc = emitted_at.isoformat(timespec="seconds")
 
     states = snapshot_chain("solana")
     enrich_solana(states)
@@ -63,10 +101,42 @@ def main() -> None:
         raw = edge.evaluate(states, cycle_ctx={"cycle_ts_utc": cycle_ts_utc})
         deduped = shadow_log.apply_dedup(raw, recent)
         for sig in deduped:
-            shadow_log.append(SHADOW_PATH, sig, edge.version, cycle_ts_utc)
+            shadow_log.append(SHADOW_PATH, sig, edge.version, cycle_ts_utc, emitted_at=emitted_at)
         skipped = len(raw) - len(deduped)
         print(f"  {edge.code}: {len(raw)} candidates -> {len(deduped)} written ({skipped} deduped)")
         all_new.extend(deduped)
+
+    # Deliver each new SHADOW signal to Telegram (muted-cards chat).
+    # kill switches / dry-run handled inside sender.
+    delivered = 0
+    with TelegramSender() as tg:
+        for sig in all_new:
+            state = _state_for_signal(sig, states)
+            if state is None:
+                continue
+            html = render_card(
+                signal=sig,
+                state=state,
+                mode="SHADOW",
+                emitted_at=emitted_at,
+                edge_short_name=EDGE_SHORT_NAMES.get(sig.edge_code, sig.edge_code),
+                resolved_count=_resolved_count_for(sig.edge_code),
+                position_usd=float(os.environ.get("POSITION_DEFAULT_USD", 15)),
+            )
+            sid = signal_id(sig.edge_code, sig.chain, emitted_at, sig.symbol)
+            sent = tg.send_card(mode="SHADOW", html=html)
+            delivery_log.append(
+                DELIVERY_PATH,
+                signal_id=sid,
+                chat_id=sent.chat_id,
+                message_id=sent.message_id,
+                mode="SHADOW",
+                ok=sent.ok,
+                error=sent.error,
+                dry_run=sent.dry_run,
+            )
+            if sent.ok:
+                delivered += 1
 
     heartbeat.beat(
         HB_PATH,
@@ -75,11 +145,12 @@ def main() -> None:
             "universe": len(states),
             "survivors": len(survivors),
             "signals_emitted": len(all_new),
+            "tg_delivered": delivered,
         },
     )
 
     if all_new:
-        print(f"\nemitted {len(all_new)} SHADOW signal(s) to {SHADOW_PATH}")
+        print(f"\nemitted {len(all_new)} SHADOW signal(s) — {delivered} delivered to Telegram")
         for sig in all_new:
             print(f"  {sig.edge_code} {sig.direction.upper()} {sig.symbol}  entry=${sig.entry_price:.6g}  reasons={sig.reasons[0]}")
     else:

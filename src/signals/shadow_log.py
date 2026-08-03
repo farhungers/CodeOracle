@@ -16,11 +16,21 @@ from typing import Iterable
 from src.edges.base import Signal
 
 
-def append(path: Path, signal: Signal, edge_version: int, cycle_ts_utc: str) -> None:
+def append(
+    path: Path,
+    signal: Signal,
+    edge_version: int,
+    cycle_ts_utc: str,
+    emitted_at: datetime | None = None,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # Caller can pin emitted_at so signal_id (built from the same value)
+    # round-trips through the resolver → delivery-log lookup consistently.
+    if emitted_at is None:
+        emitted_at = datetime.now(timezone.utc)
     row = {
         "cycle_ts_utc": cycle_ts_utc,
-        "emitted_ts_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "emitted_ts_utc": emitted_at.isoformat(timespec="seconds"),
         "edge_code": signal.edge_code,
         "edge_version": edge_version,
         "mode": "shadow",

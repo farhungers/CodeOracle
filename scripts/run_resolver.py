@@ -17,12 +17,18 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(ROOT / ".env")
 
+from datetime import datetime  # noqa: E402
+
 from src.audit import heartbeat  # noqa: E402
 from src.resolver.open_scanner import resolve_open_signals  # noqa: E402
+from src.telegram import delivery_log  # noqa: E402
+from src.telegram.formatter import Resolution as FmtResolution, render_resolution, signal_id  # noqa: E402
+from src.telegram.sender import TelegramSender  # noqa: E402
 
 SHADOW_PATH = ROOT / "research" / "shadow_log.jsonl"
 RES_PATH = ROOT / "research" / "resolutions.jsonl"
 HB_PATH = ROOT / "research" / "heartbeat.jsonl"
+DELIVERY_PATH = ROOT / "research" / "tg_delivery.jsonl"
 
 
 def main() -> None:
@@ -37,7 +43,47 @@ def main() -> None:
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     new_res = resolve_open_signals(SHADOW_PATH, RES_PATH)
-    heartbeat.beat(HB_PATH, task="resolver_solana", extra={"new_resolutions": len(new_res)})
+
+    # Post resolution replies threaded to the original card.
+    delivered = 0
+    with TelegramSender() as tg:
+        for r in new_res:
+            emitted_at = datetime.fromisoformat(r.emitted_ts_utc)
+            sid = signal_id(r.edge_code, r.chain, emitted_at, r.symbol)
+            chat_id, message_id = delivery_log.lookup_message_id(DELIVERY_PATH, sid)
+            html = render_resolution(FmtResolution(
+                signal_id=sid,
+                symbol=r.symbol,
+                outcome=r.outcome,
+                r_multiple=r.r_multiple,
+                held_minutes=r.held_minutes,
+                exit_price=r.exit_price,
+            ))
+            # Reply to original card if we have a message_id; otherwise plain post.
+            sent = tg.send_card(
+                mode="SHADOW",  # replies land in the same channel as the original
+                html=html,
+                reply_to_message_id=message_id,
+                chat_id_override=chat_id,
+            )
+            delivery_log.append(
+                DELIVERY_PATH,
+                signal_id=sid + f":resolution:{r.outcome}",
+                chat_id=sent.chat_id,
+                message_id=sent.message_id,
+                mode="SHADOW",
+                ok=sent.ok,
+                error=sent.error,
+                dry_run=sent.dry_run,
+            )
+            if sent.ok:
+                delivered += 1
+
+    heartbeat.beat(
+        HB_PATH,
+        task="resolver_solana",
+        extra={"new_resolutions": len(new_res), "tg_delivered": delivered},
+    )
 
     if not new_res:
         print("no new resolutions this cycle")
