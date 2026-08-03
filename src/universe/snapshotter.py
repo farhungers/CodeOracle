@@ -17,6 +17,7 @@ from typing import Iterable
 from src.ingest.bitget import BitgetClient
 from src.ingest.dexscreener import DexScreenerClient, DiscoveryHit
 from src.ingest.helius import HeliusClient
+from src.ingest.rugcheck import RugCheckClient
 from src.universe.survivorship import GateConfig, evaluate as gate_evaluate
 
 log = logging.getLogger(__name__)
@@ -52,6 +53,11 @@ class TokenState:
     # Bitget cross-listing (None until apply_bitget_crosslisting runs)
     # True = token is on Bitget spot/futures -> Pythia's turf, we skip
     crosslisted: bool | None = None
+    # RugCheck (SOL only; None until apply_rugcheck runs)
+    rugcheck_score_normalised: int | None = None
+    rugcheck_has_danger: bool | None = None
+    rugcheck_danger_names: list[str] = field(default_factory=list)
+    rugcheck_lp_locked_pct: float | None = None
     # GATE ZERO (None until survivorship runs)
     survives_gate0: bool | None = None
     fail_reasons: list[str] = field(default_factory=list)
@@ -200,6 +206,38 @@ def enrich_solana(
             helius.close()
 
 
+def apply_rugcheck(
+    states: list[TokenState],
+    rugcheck: RugCheckClient | None = None,
+) -> None:
+    """In-place: populate rugcheck_* fields for SOL entries only.
+
+    Applied AFTER apply_gate_zero survives so we don't burn API budget on
+    tokens already filtered by cheap gates. Callers pass ONLY the survivors
+    into this function to keep the request volume bounded.
+
+    Per-token failures leave fields as None — the gate treats
+    rugcheck_has_danger=None as pass (fail open, same discipline as the
+    Bitget crosslisting check).
+    """
+    own = rugcheck is None
+    rugcheck = rugcheck or RugCheckClient()
+    try:
+        for s in states:
+            if s.chain != "solana":
+                continue
+            risk = rugcheck.token_risk(s.token_addr)
+            if risk is None:
+                continue
+            s.rugcheck_score_normalised = risk.score_normalised
+            s.rugcheck_has_danger = risk.has_danger
+            s.rugcheck_danger_names = risk.danger_names
+            s.rugcheck_lp_locked_pct = risk.lp_locked_pct
+    finally:
+        if own:
+            rugcheck.close()
+
+
 def apply_gate_zero(states: list[TokenState], cfg: GateConfig | None = None) -> None:
     """In-place: set survives_gate0 + fail_reasons on each state."""
     cfg = cfg or GateConfig.from_env()
@@ -213,6 +251,7 @@ def apply_gate_zero(states: list[TokenState], cfg: GateConfig | None = None) -> 
             top10_pct=s.top10_pct,
             cfg=cfg,
             crosslisted=s.crosslisted,
+            rugcheck_has_danger=s.rugcheck_has_danger,
         )
         s.survives_gate0 = result.survives
         s.fail_reasons = result.reasons

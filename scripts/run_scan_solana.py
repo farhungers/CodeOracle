@@ -33,6 +33,7 @@ from src.universe.snapshotter import (  # noqa: E402
     TokenState,
     apply_bitget_crosslisting,
     apply_gate_zero,
+    apply_rugcheck,
     enrich_solana,
     snapshot_chain,
 )
@@ -92,11 +93,15 @@ def main() -> None:
     states = snapshot_chain("solana")
     enrich_solana(states)
     apply_bitget_crosslisting(states)
-    apply_gate_zero(states)
+    apply_gate_zero(states)                                    # first pass: cheap gates
+
+    cheap_survivors = [s for s in states if s.survives_gate0]  # bandwidth-bounded set
+    apply_rugcheck(cheap_survivors)                            # only for survivors
+    apply_gate_zero(states)                                    # re-gate: RugCheck may flip some to fail
 
     survivors = [s for s in states if s.survives_gate0]
     print(f"cycle_ts={cycle_ts_utc}")
-    print(f"universe={len(states)}  survivors={len(survivors)}")
+    print(f"universe={len(states)}  cheap_survivors={len(cheap_survivors)}  final_survivors={len(survivors)}")
 
     # Persist history so future cycles can compute 12h/24h deltas.
     snapshot_universe(survivors, HISTORY_PATH, now=emitted_at)

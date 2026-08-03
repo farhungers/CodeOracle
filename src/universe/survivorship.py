@@ -60,6 +60,7 @@ def evaluate(
     top10_pct: float | None,
     cfg: GateConfig | None = None,
     crosslisted: bool | None = None,
+    rugcheck_has_danger: bool | None = None,
 ) -> GateResult:
     """Pure evaluator. Any None input for a gated field = fail-safe (fail the gate).
 
@@ -81,6 +82,9 @@ def evaluate(
 
     if crosslisted is True:
         reasons.append("crosslisted_bitget")
+
+    if rugcheck_has_danger is True:
+        reasons.append("rugcheck_danger")
 
     if liq_usd is None or liq_usd < cfg.liq_min_usd:
         reasons.append(f"liq_below_{int(cfg.liq_min_usd)}")
