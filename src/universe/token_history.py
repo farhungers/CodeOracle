@@ -68,6 +68,60 @@ def snapshot_universe(states: Iterable, path: Path, now: Optional[datetime] = No
     return written
 
 
+def prune(
+    path: Path,
+    retention_hours: float = 48.0,
+    now: Optional[datetime] = None,
+    min_stale_ratio: float = 0.20,
+) -> tuple[int, int]:
+    """Drop rows older than retention_hours. Returns (kept, dropped).
+
+    Only rewrites the file when stale rows exceed min_stale_ratio (default
+    20%) of total — avoids churning the file on every cycle when there's
+    nothing meaningful to drop.
+    """
+    if os.environ.get("HISTORY_DISABLED", "").lower() == "true":
+        return (0, 0)
+    if not path.exists():
+        return (0, 0)
+    now = now or datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=retention_hours)
+
+    kept_lines: list[str] = []
+    total = 0
+    dropped = 0
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            raw = line.rstrip("\n")
+            if not raw.strip():
+                continue
+            total += 1
+            try:
+                ts = datetime.fromisoformat(json.loads(raw)["ts_utc"])
+            except (json.JSONDecodeError, KeyError, ValueError):
+                # keep malformed rows — don't destroy user data on parse error
+                kept_lines.append(raw)
+                continue
+            if ts < cutoff:
+                dropped += 1
+                continue
+            kept_lines.append(raw)
+
+    if total == 0:
+        return (0, 0)
+    if dropped / total < min_stale_ratio:
+        # Not worth rewriting; report file as untouched.
+        return (total, 0)
+
+    # atomic-ish rewrite
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        for line in kept_lines:
+            f.write(line + "\n")
+    tmp.replace(path)
+    return (len(kept_lines), dropped)
+
+
 def _iter_recent(path: Path, chain: str, token_addr: str, cutoff: datetime) -> Iterable[_Row]:
     if not path.exists():
         return

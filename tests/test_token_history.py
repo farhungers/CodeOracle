@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from src.universe.snapshotter import TokenState
-from src.universe.token_history import get_diff, snapshot_universe
+from src.universe.token_history import get_diff, prune, snapshot_universe
 
 
 NOW = datetime(2026, 8, 3, 14, 0, 0, tzinfo=timezone.utc)
@@ -184,3 +184,64 @@ def test_disabled_kill_switch_returns_empty_diff(tmp_path, monkeypatch):
     _write_row(p, NOW - timedelta(hours=24), holder_count=900)
     diff = get_diff(p, "solana", "A", _state(holder_count=1000), now=NOW)
     assert diff.holders_delta_24h is None
+
+
+# ---------- prune ---------------------------------------------------------
+
+
+def test_prune_missing_file_noop(tmp_path):
+    kept, dropped = prune(tmp_path / "nope.jsonl", retention_hours=48, now=NOW)
+    assert (kept, dropped) == (0, 0)
+
+
+def test_prune_drops_old_rows_when_ratio_exceeded(tmp_path):
+    p = tmp_path / "h.jsonl"
+    # 1 fresh, 4 stale — 80% stale, way over the 20% threshold
+    _write_row(p, NOW - timedelta(hours=1), liq_usd=1)
+    _write_row(p, NOW - timedelta(hours=60), liq_usd=2)
+    _write_row(p, NOW - timedelta(hours=61), liq_usd=3)
+    _write_row(p, NOW - timedelta(hours=62), liq_usd=4)
+    _write_row(p, NOW - timedelta(hours=63), liq_usd=5)
+    kept, dropped = prune(p, retention_hours=48, now=NOW)
+    assert kept == 1
+    assert dropped == 4
+    remaining = p.read_text(encoding="utf-8").splitlines()
+    assert len(remaining) == 1
+
+
+def test_prune_skips_rewrite_when_below_threshold(tmp_path):
+    p = tmp_path / "h.jsonl"
+    # 9 fresh, 1 stale — 10% stale, below default 20% threshold
+    for i in range(9):
+        _write_row(p, NOW - timedelta(hours=1, minutes=i), liq_usd=i)
+    _write_row(p, NOW - timedelta(hours=60), liq_usd=99)
+    kept, dropped = prune(p, retention_hours=48, now=NOW, min_stale_ratio=0.20)
+    # Not rewritten -> dropped reported as 0
+    assert dropped == 0
+    assert kept == 10  # reports "kept the whole file"
+    lines = p.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 10  # file untouched
+
+
+def test_prune_preserves_malformed_lines(tmp_path):
+    p = tmp_path / "h.jsonl"
+    _write_row(p, NOW - timedelta(hours=60), liq_usd=1)
+    _write_row(p, NOW - timedelta(hours=61), liq_usd=2)
+    _write_row(p, NOW - timedelta(hours=1), liq_usd=3)
+    # Append a malformed line
+    with p.open("a", encoding="utf-8") as f:
+        f.write("garbage\n")
+    kept, dropped = prune(p, retention_hours=48, now=NOW, min_stale_ratio=0.20)
+    assert dropped == 2
+    remaining = p.read_text(encoding="utf-8").splitlines()
+    assert "garbage" in remaining
+
+
+def test_prune_disabled_by_kill_switch(tmp_path, monkeypatch):
+    monkeypatch.setenv("HISTORY_DISABLED", "true")
+    p = tmp_path / "h.jsonl"
+    _write_row(p, NOW - timedelta(hours=60), liq_usd=1)
+    kept, dropped = prune(p, retention_hours=48, now=NOW)
+    assert (kept, dropped) == (0, 0)
+    # file untouched
+    assert p.read_text(encoding="utf-8").strip() != ""

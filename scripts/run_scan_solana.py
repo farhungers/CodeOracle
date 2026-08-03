@@ -37,7 +37,7 @@ from src.universe.snapshotter import (  # noqa: E402
     enrich_solana,
     snapshot_chain,
 )
-from src.universe.token_history import get_diff, snapshot_universe  # noqa: E402
+from src.universe.token_history import get_diff, prune as prune_history, snapshot_universe  # noqa: E402
 
 SHADOW_PATH = ROOT / "research" / "shadow_log.jsonl"
 RES_PATH = ROOT / "research" / "resolutions.jsonl"
@@ -105,6 +105,7 @@ def main() -> None:
 
     # Persist history so future cycles can compute 12h/24h deltas.
     snapshot_universe(survivors, HISTORY_PATH, now=emitted_at)
+    prune_history(HISTORY_PATH, retention_hours=48.0, now=emitted_at)
 
     edges = [E1HolderConcentration()]
     all_new: list = []
