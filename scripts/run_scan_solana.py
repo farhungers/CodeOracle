@@ -20,6 +20,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(ROOT / ".env")
 
+from src.audit import heartbeat  # noqa: E402
 from src.edges.e1_holder_concentration import E1HolderConcentration  # noqa: E402
 from src.signals import shadow_log  # noqa: E402
 from src.universe.snapshotter import (  # noqa: E402
@@ -29,6 +30,7 @@ from src.universe.snapshotter import (  # noqa: E402
 )
 
 SHADOW_PATH = ROOT / "research" / "shadow_log.jsonl"
+HB_PATH = ROOT / "research" / "heartbeat.jsonl"
 
 
 def main() -> None:
@@ -65,6 +67,16 @@ def main() -> None:
         skipped = len(raw) - len(deduped)
         print(f"  {edge.code}: {len(raw)} candidates -> {len(deduped)} written ({skipped} deduped)")
         all_new.extend(deduped)
+
+    heartbeat.beat(
+        HB_PATH,
+        task="scan_solana",
+        extra={
+            "universe": len(states),
+            "survivors": len(survivors),
+            "signals_emitted": len(all_new),
+        },
+    )
 
     if all_new:
         print(f"\nemitted {len(all_new)} SHADOW signal(s) to {SHADOW_PATH}")
