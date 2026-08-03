@@ -1,12 +1,12 @@
-# CodeOracle — Windows Task Scheduler registration
+# CodeOracle - Windows Task Scheduler registration
 #
 # Idempotent: safe to re-run. Removes any existing task with the same name
 # before re-registering. Requires an elevated PowerShell (Run as Admin) only
 # if RunLevel=Highest is left uncommented.
 #
 # Registered tasks (v1):
-#   CodeOracle_ScanSolana      — every 5 min → scripts/run_scan_solana.py
-#   CodeOracle_ResolverSolana  — every 5 min → scripts/run_resolver.py
+#   CodeOracle_ScanSolana      - every 5 min -> scripts/run_scan_solana.py
+#   CodeOracle_ResolverSolana  - every 5 min -> scripts/run_resolver.py
 #
 # Future tasks (E4, E9, digest, expirer, etc.) are stubbed at the bottom
 # commented out; uncomment when their runners exist.
@@ -18,7 +18,7 @@ $Venv        = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
 $LogDir      = Join-Path $ProjectRoot "logs"
 
 if (-not (Test-Path $Venv)) {
-    Write-Warning "Python venv not found at $Venv — falling back to system python. Recommended: python -m venv .venv"
+    Write-Warning "Python venv not found at $Venv - falling back to system python. Recommended: python -m venv .venv"
     $Venv = "python"
 }
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
@@ -77,7 +77,7 @@ Register-CodeOracleTask `
     -IntervalMinutes 5 `
     -LogFile (Join-Path $LogDir "resolver_solana.log")
 
-# --- future tasks (stub — uncomment when runner lands) --------------------
+# --- future tasks (stub, uncomment when runner lands) ---------------------
 # Register-CodeOracleTask -Name "CodeOracle_Digest"      -Script "scripts\run_digest.py"       -IntervalMinutes 1440 -LogFile "$LogDir\digest.log"
 # Register-CodeOracleTask -Name "CodeOracle_ScanBSC"     -Script "scripts\run_scan_bsc.py"     -IntervalMinutes 15   -LogFile "$LogDir\scan_bsc.log"
 # Register-CodeOracleTask -Name "CodeOracle_ScanETH"     -Script "scripts\run_scan_eth.py"     -IntervalMinutes 15   -LogFile "$LogDir\scan_eth.log"
