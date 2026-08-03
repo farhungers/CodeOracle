@@ -1095,6 +1095,24 @@ SOURCE_RUGCHECK_DISABLED=false
 SOURCE_TOKENSNIFFER_DISABLED=false
 ```
 
+## ADD-8: Dead-token filter reframed from vol/mcap to vol/liq (body §2.4)
+
+Empirical Day-3 finding: `GATE_VOL_MCAP_RATIO_MIN=3.0` incorrectly rejected 3/3 otherwise-qualifying tokens (CATWIF top10=29%, tolywifhat top10=22%, both 1000 holders, both in E1 age window). These tokens have high mcap ($50M+) relative to their pool depth, so vol/mcap is <<1 even during healthy $700k+ daily volume.
+
+The plan's stated intent was "dead-token filter — reject tokens that traded once then died" (edge guide Part 4). The correct primitive for THAT intent is **pool turnover**: `vol_24h / liq_usd >= 1.0` means the pool has traded through at least once in 24h. A truly dead token (one trade, then silence) has vol close to 0 while its pool still exists — this filter catches it. An established meme with $50M mcap and $200k pool has vol/liq of 4–25× — it passes.
+
+**Change:**
+- `GATE_VOL_MCAP_RATIO_MIN=3.0` → **`GATE_VOL_LIQ_RATIO_MIN=1.0`**
+- Env var renamed; downstream code updated
+- Body §2.4 row "24h volume ≥ 3× current market cap" is superseded by "24h volume ≥ 1× primary-pool liquidity"
+
+**Confirmation:** re-run showed 2 survivors of 44 (was 0/44) — realistic recovery of the E1 candidate universe.
+
+## ADDENDUM version log
+
+- v1.1 — 2026-07-10 — probe-driven revisions after founding session
+- v1.1 patch — 2026-07-10 — ADD-8 empirical vol/liq reframing after Day-3 run
+
 ## ADDENDUM Week-1 milestone changes to §9
 
 - **Day 2 (Ingest + universe):** replace "`ingest/bitget_onchain.py`" bullet with "`ingest/dexscreener.py` — universe roster via `/dex/search`, per-token enrichment via `/dex/tokens/{addr}`, chain filtering to SOL in v1."
@@ -1107,10 +1125,6 @@ SOURCE_TOKENSNIFFER_DISABLED=false
 - `.gitignore` — created
 - `research/data_source_probe.md` — full probe evidence
 - `_probe/` — raw response captures (gitignored)
-
-## ADDENDUM version log
-
-- v1.1 — 2026-07-10 — probe-driven revisions after founding session
 
 ---
 

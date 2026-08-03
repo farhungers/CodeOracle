@@ -19,7 +19,11 @@ class GateConfig:
     liq_min_usd: float = 100_000.0
     holder_min: int = 100
     top10_max_pct: float = 0.60
-    vol_mcap_ratio_min: float = 3.0
+    # ADDENDUM v1.1 ADD-8: gate reframed from vol/mcap to vol/liq (pool
+    # turnover). Original vol/mcap>3 rejects established tokens whose mcap
+    # legitimately outsizes their pool (CATWIF, tolywifhat empirically).
+    # Intent was dead-token filter: pool turned over at least once in 24h.
+    vol_liq_ratio_min: float = 1.0
     age_min_hours: float = 6.0
     age_max_days: float = 30.0
 
@@ -35,7 +39,7 @@ class GateConfig:
             liq_min_usd=_f("GATE_LIQ_MIN_USD", 100_000.0),
             holder_min=_i("GATE_HOLDER_MIN", 100),
             top10_max_pct=_f("GATE_TOP10_MAX_PCT", 0.60),
-            vol_mcap_ratio_min=_f("GATE_VOL_MCAP_RATIO_MIN", 3.0),
+            vol_liq_ratio_min=_f("GATE_VOL_LIQ_RATIO_MIN", 1.0),
             age_min_hours=_f("GATE_AGE_MIN_HOURS", 6.0),
             age_max_days=_f("GATE_AGE_MAX_DAYS", 30.0),
         )
@@ -90,12 +94,11 @@ def evaluate(
     elif top10_pct > cfg.top10_max_pct:
         reasons.append(f"top10_gt_{int(cfg.top10_max_pct*100)}pct")
 
-    # vol/mcap ratio: if either is missing, skip this gate (not fatal — mcap
-    # can legitimately be None for very-new tokens; caller can still choose to
-    # filter). We keep the check only when both are known.
-    if vol_24h_usd is not None and mcap_usd not in (None, 0):
-        ratio = vol_24h_usd / mcap_usd  # type: ignore[operator]
-        if ratio < cfg.vol_mcap_ratio_min:
-            reasons.append(f"vol_mcap_ratio_lt_{cfg.vol_mcap_ratio_min}")
+    # vol/liq turnover: pool must have turned over at least once in 24h.
+    # Dead-token filter per ADDENDUM v1.1 ADD-8.
+    if vol_24h_usd is not None and liq_usd not in (None, 0):
+        ratio = vol_24h_usd / liq_usd  # type: ignore[operator]
+        if ratio < cfg.vol_liq_ratio_min:
+            reasons.append(f"vol_liq_ratio_lt_{cfg.vol_liq_ratio_min}")
 
     return GateResult(survives=not reasons, reasons=reasons)
