@@ -24,6 +24,7 @@ import os  # noqa: E402
 
 from src.audit import heartbeat  # noqa: E402
 from src.edges.e1_holder_concentration import E1HolderConcentration  # noqa: E402
+from src.ingest.coingecko import CoinGeckoClient  # noqa: E402
 from src.signals import shadow_log  # noqa: E402
 from src.telegram import delivery_log  # noqa: E402
 from src.telegram.formatter import render_card, signal_id  # noqa: E402
@@ -34,11 +35,13 @@ from src.universe.snapshotter import (  # noqa: E402
     enrich_solana,
     snapshot_chain,
 )
+from src.universe.token_history import get_diff, snapshot_universe  # noqa: E402
 
 SHADOW_PATH = ROOT / "research" / "shadow_log.jsonl"
 RES_PATH = ROOT / "research" / "resolutions.jsonl"
 HB_PATH = ROOT / "research" / "heartbeat.jsonl"
 DELIVERY_PATH = ROOT / "research" / "tg_delivery.jsonl"
+HISTORY_PATH = ROOT / "research" / "token_history.jsonl"
 
 EDGE_SHORT_NAMES = {
     "E1": "holder concentration",
@@ -93,6 +96,9 @@ def main() -> None:
     print(f"cycle_ts={cycle_ts_utc}")
     print(f"universe={len(states)}  survivors={len(survivors)}")
 
+    # Persist history so future cycles can compute 12h/24h deltas.
+    snapshot_universe(survivors, HISTORY_PATH, now=emitted_at)
+
     edges = [E1HolderConcentration()]
     all_new: list = []
     recent = shadow_log.recent_dedup_keys(SHADOW_PATH, hours=24)
@@ -108,12 +114,15 @@ def main() -> None:
 
     # Deliver each new SHADOW signal to Telegram (muted-cards chat).
     # kill switches / dry-run handled inside sender.
+    # CoinGecko rank is lazy-fetched only for tokens that survive to emission.
     delivered = 0
-    with TelegramSender() as tg:
+    with TelegramSender() as tg, CoinGeckoClient() as cg:
         for sig in all_new:
             state = _state_for_signal(sig, states)
             if state is None:
                 continue
+            cg_rank = cg.market_cap_rank(sig.chain, sig.token_addr)
+            history = get_diff(HISTORY_PATH, sig.chain, sig.token_addr, state, now=emitted_at)
             html = render_card(
                 signal=sig,
                 state=state,
@@ -122,6 +131,8 @@ def main() -> None:
                 edge_short_name=EDGE_SHORT_NAMES.get(sig.edge_code, sig.edge_code),
                 resolved_count=_resolved_count_for(sig.edge_code),
                 position_usd=float(os.environ.get("POSITION_DEFAULT_USD", 15)),
+                cg_rank=cg_rank,
+                history=history,
             )
             sid = signal_id(sig.edge_code, sig.chain, emitted_at, sig.symbol)
             sent = tg.send_card(mode="SHADOW", html=html)
