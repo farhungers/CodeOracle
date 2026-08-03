@@ -1,0 +1,61 @@
+name: scan-cycle
+
+on:
+  schedule:
+    - cron: "5 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan-cycle
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scan
+        env:
+          CODEORACLE_HELIUS_KEY: ${{ secrets.CODEORACLE_HELIUS_KEY }}
+          CODEORACLE_TG_TOKEN: ${{ secrets.CODEORACLE_TG_TOKEN }}
+          CODEORACLE_TG_CHAT_MUTED: ${{ secrets.CODEORACLE_TG_CHAT_MUTED }}
+          CODEORACLE_TG_CHAT_LIVE: ${{ secrets.CODEORACLE_TG_CHAT_LIVE }}
+          CODEORACLE_TG_CHAT_DIGEST: ${{ secrets.CODEORACLE_TG_CHAT_DIGEST }}
+        run: python scripts/run_scan_solana.py
+
+      - name: Resolver
+        env:
+          CODEORACLE_HELIUS_KEY: ${{ secrets.CODEORACLE_HELIUS_KEY }}
+          CODEORACLE_TG_TOKEN: ${{ secrets.CODEORACLE_TG_TOKEN }}
+          CODEORACLE_TG_CHAT_MUTED: ${{ secrets.CODEORACLE_TG_CHAT_MUTED }}
+        run: python scripts/run_resolver.py
+
+      - name: Commit state
+        run: |
+          git config user.name "codeoracle-bot"
+          git config user.email "codeoracle-bot@users.noreply.github.com"
+          for f in shadow_log.jsonl resolutions.jsonl heartbeat.jsonl tg_delivery.jsonl token_history.jsonl; do
+            [ -f "research/$f" ] && git add -f "research/$f"
+          done
+          if git diff --staged --quiet; then
+            echo "no state changes to commit"
+            exit 0
+          fi
+          git commit -m "state: cycle $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip ci]"
+          git pull --rebase origin master
+          git push origin HEAD:master
