@@ -59,6 +59,7 @@ def evaluate(
     holder_count: int | None,
     top10_pct: float | None,
     cfg: GateConfig | None = None,
+    crosslisted: bool | None = None,
 ) -> GateResult:
     """Pure evaluator. Any None input for a gated field = fail-safe (fail the gate).
 
@@ -67,11 +68,19 @@ def evaluate(
       - LP-lock status — not sourced in v1 discovery layer
       - mint-authority renounced — not sourced in v1
 
+    Crosslisted-with-Bitget check (STARTUP_PACKAGE §2.2): if the token
+    already appears on Bitget spot/futures, it belongs to Pythia — we
+    exclude it. `crosslisted=None` means the check wasn't performed and
+    is not a fail (fail-open — better to over-scan than mis-classify).
+
     v1 is intentionally the mechanical subset that we can prove from
     DexScreener + Helius data. Non-mechanical rug heuristics are deferred.
     """
     cfg = cfg or GateConfig.from_env()
     reasons: list[str] = []
+
+    if crosslisted is True:
+        reasons.append("crosslisted_bitget")
 
     if liq_usd is None or liq_usd < cfg.liq_min_usd:
         reasons.append(f"liq_below_{int(cfg.liq_min_usd)}")

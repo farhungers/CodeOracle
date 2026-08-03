@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Iterable
 
+from src.ingest.bitget import BitgetClient
 from src.ingest.dexscreener import DexScreenerClient, DiscoveryHit
 from src.ingest.helius import HeliusClient
 from src.universe.survivorship import GateConfig, evaluate as gate_evaluate
@@ -48,6 +49,9 @@ class TokenState:
     # Helius enrichment (SOL only; None until enrich_solana runs)
     top10_pct: float | None = None
     holder_count: int | None = None
+    # Bitget cross-listing (None until apply_bitget_crosslisting runs)
+    # True = token is on Bitget spot/futures -> Pythia's turf, we skip
+    crosslisted: bool | None = None
     # GATE ZERO (None until survivorship runs)
     survives_gate0: bool | None = None
     fail_reasons: list[str] = field(default_factory=list)
@@ -145,6 +149,29 @@ def snapshot_chain(
             client.close()
 
 
+def apply_bitget_crosslisting(
+    states: list[TokenState],
+    bitget: BitgetClient | None = None,
+) -> None:
+    """In-place: mark each state.crosslisted True/False based on Bitget roster.
+
+    Case-insensitive symbol match against baseCoin. Per STARTUP_PACKAGE §2.2:
+    crosslisted tokens belong to Pythia — CodeOracle skips them.
+
+    If Bitget is unreachable, all states get crosslisted=False (fail open —
+    scanning our own tokens is preferable to silently dropping the universe).
+    """
+    own = bitget is None
+    bitget = bitget or BitgetClient()
+    try:
+        roster = bitget.all_base_coins()
+    finally:
+        if own:
+            bitget.close()
+    for s in states:
+        s.crosslisted = bool(s.symbol) and s.symbol.upper() in roster
+
+
 def enrich_solana(
     states: list[TokenState],
     helius: HeliusClient | None = None,
@@ -185,6 +212,7 @@ def apply_gate_zero(states: list[TokenState], cfg: GateConfig | None = None) -> 
             holder_count=s.holder_count,
             top10_pct=s.top10_pct,
             cfg=cfg,
+            crosslisted=s.crosslisted,
         )
         s.survives_gate0 = result.survives
         s.fail_reasons = result.reasons

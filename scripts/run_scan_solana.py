@@ -31,6 +31,7 @@ from src.telegram.formatter import render_card, signal_id  # noqa: E402
 from src.telegram.sender import TelegramSender  # noqa: E402
 from src.universe.snapshotter import (  # noqa: E402
     TokenState,
+    apply_bitget_crosslisting,
     apply_gate_zero,
     enrich_solana,
     snapshot_chain,
@@ -90,6 +91,7 @@ def main() -> None:
 
     states = snapshot_chain("solana")
     enrich_solana(states)
+    apply_bitget_crosslisting(states)
     apply_gate_zero(states)
 
     survivors = [s for s in states if s.survives_gate0]
