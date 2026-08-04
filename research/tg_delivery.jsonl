@@ -1,1 +1,2 @@
 {"sent_ts_utc": "2026-08-04T10:18:02+00:00", "signal_id": "E1-SOL-20260804T101741Z-tiktok", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-04T23:42:50+00:00", "signal_id": "E1-SOL-20260804T101741Z-tiktok:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
