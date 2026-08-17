@@ -24,6 +24,8 @@ import os  # noqa: E402
 
 from src.audit import heartbeat  # noqa: E402
 from src.edges.e1_holder_concentration import E1HolderConcentration  # noqa: E402
+from src.edges.e1d_pullback import E1DPullback  # noqa: E402
+from src.edges.e1e_post_graduation import E1EPostGraduation  # noqa: E402
 from src.ingest.coingecko import CoinGeckoClient  # noqa: E402
 from src.signals import shadow_log  # noqa: E402
 from src.telegram import delivery_log  # noqa: E402
@@ -47,6 +49,8 @@ HISTORY_PATH = ROOT / "research" / "token_history.jsonl"
 
 EDGE_SHORT_NAMES = {
     "E1": "holder concentration",
+    "E1d": "holder concentration (pullback)",
+    "E1e": "holder concentration (post-graduation)",
 }
 
 
@@ -107,7 +111,7 @@ def main() -> None:
     snapshot_universe(survivors, HISTORY_PATH, now=emitted_at)
     prune_history(HISTORY_PATH, retention_hours=48.0, now=emitted_at)
 
-    edges = [E1HolderConcentration()]
+    edges = [E1HolderConcentration(), E1DPullback(), E1EPostGraduation()]
     all_new: list = []
     recent = shadow_log.recent_dedup_keys(SHADOW_PATH, hours=24)
 
