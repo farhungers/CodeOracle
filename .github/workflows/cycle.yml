@@ -36,6 +36,10 @@ jobs:
           CODEORACLE_TG_CHAT_MUTED: ${{ secrets.CODEORACLE_TG_CHAT_MUTED }}
           CODEORACLE_TG_CHAT_LIVE: ${{ secrets.CODEORACLE_TG_CHAT_LIVE }}
           CODEORACLE_TG_CHAT_DIGEST: ${{ secrets.CODEORACLE_TG_CHAT_DIGEST }}
+          # Addendum v1.3 (2026-08-17): liq floor lowered from $100k to $50k
+          # after first funnel telemetry showed 96% of candidates fail at $100k.
+          # See research/addendum_v1_3_liq_floor.md for cohort semantics.
+          GATE_LIQ_MIN_USD: "50000"
         run: python scripts/run_scan_solana.py
 
       - name: Resolver
