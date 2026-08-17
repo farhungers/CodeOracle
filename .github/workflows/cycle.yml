@@ -45,11 +45,14 @@ jobs:
           CODEORACLE_TG_CHAT_MUTED: ${{ secrets.CODEORACLE_TG_CHAT_MUTED }}
         run: python scripts/run_resolver.py
 
+      - name: Resolver v2 (OHLC-based, addendum v1.2)
+        run: python scripts/run_resolver_v2.py
+
       - name: Commit state
         run: |
           git config user.name "codeoracle-bot"
           git config user.email "codeoracle-bot@users.noreply.github.com"
-          for f in shadow_log.jsonl resolutions.jsonl heartbeat.jsonl tg_delivery.jsonl token_history.jsonl; do
+          for f in shadow_log.jsonl resolutions.jsonl resolutions_v2.jsonl heartbeat.jsonl tg_delivery.jsonl token_history.jsonl; do
             [ -f "research/$f" ] && git add -f "research/$f"
           done
           if git diff --staged --quiet; then
