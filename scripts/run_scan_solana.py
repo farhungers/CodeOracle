@@ -22,7 +22,7 @@ load_dotenv(ROOT / ".env")
 
 import os  # noqa: E402
 
-from src.audit import heartbeat  # noqa: E402
+from src.audit import gate_stats, heartbeat  # noqa: E402
 from src.edges.e1_holder_concentration import E1HolderConcentration  # noqa: E402
 from src.edges.e1d_pullback import E1DPullback  # noqa: E402
 from src.edges.e1e_post_graduation import E1EPostGraduation  # noqa: E402
@@ -46,6 +46,7 @@ RES_PATH = ROOT / "research" / "resolutions.jsonl"
 HB_PATH = ROOT / "research" / "heartbeat.jsonl"
 DELIVERY_PATH = ROOT / "research" / "tg_delivery.jsonl"
 HISTORY_PATH = ROOT / "research" / "token_history.jsonl"
+GATE_STATS_PATH = ROOT / "research" / "gate_stats.jsonl"
 
 EDGE_SHORT_NAMES = {
     "E1": "holder concentration",
@@ -106,6 +107,12 @@ def main() -> None:
     survivors = [s for s in states if s.survives_gate0]
     print(f"cycle_ts={cycle_ts_utc}")
     print(f"universe={len(states)}  cheap_survivors={len(cheap_survivors)}  final_survivors={len(survivors)}")
+
+    stats = gate_stats.aggregate(states, chain="solana", cycle_ts_utc=cycle_ts_utc)
+    gate_stats.append(GATE_STATS_PATH, stats)
+    if stats["reason_counts"]:
+        top_reasons = sorted(stats["reason_counts"].items(), key=lambda kv: -kv[1])[:5]
+        print("  gate drops: " + ", ".join(f"{k}={v}" for k, v in top_reasons))
 
     # Persist history so future cycles can compute 12h/24h deltas.
     snapshot_universe(survivors, HISTORY_PATH, now=emitted_at)
