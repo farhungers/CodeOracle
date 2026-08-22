@@ -40,3 +40,5 @@
 {"sent_ts_utc": "2026-08-21T20:36:20+00:00", "signal_id": "E1d-SOL-20260821T203559Z-rika", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-08-21T20:36:20+00:00", "signal_id": "E1-SOL-20260821T164724Z-rika:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-08-22T01:46:27+00:00", "signal_id": "E1d-SOL-20260821T203559Z-rika:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-22T08:43:07+00:00", "signal_id": "E1-SOL-20260822T084240Z-catszn", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-22T08:43:07+00:00", "signal_id": "E1d-SOL-20260822T084240Z-catszn", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
