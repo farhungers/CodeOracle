@@ -50,3 +50,6 @@
 {"sent_ts_utc": "2026-08-23T04:48:53+00:00", "signal_id": "E1-SOL-20260823T015623Z-mcga:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-08-23T04:48:53+00:00", "signal_id": "E1d-SOL-20260823T015623Z-mcga:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-08-23T08:44:08+00:00", "signal_id": "E1-SOL-20260823T084348Z-winning", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-23T12:58:13+00:00", "signal_id": "E1-SOL-20260823T125754Z-catlist", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-23T12:58:13+00:00", "signal_id": "E1d-SOL-20260823T125754Z-catlist", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-08-23T12:58:14+00:00", "signal_id": "E1-SOL-20260823T084348Z-winning:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
