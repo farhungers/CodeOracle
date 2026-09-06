@@ -93,3 +93,4 @@
 {"ts_utc": "2026-09-05T15:06:06+00:00", "chain": "solana", "universe_size": 25, "survivors": 1, "failed": 24, "reason_counts": {"crosslisted_bitget": 2, "liq_under": 20, "age_too_young": 9, "top10_over": 15, "holders_under": 6, "age_too_old": 6, "vol_liq_ratio_under": 5}}
 {"ts_utc": "2026-09-05T18:11:44+00:00", "chain": "solana", "universe_size": 28, "survivors": 3, "failed": 25, "reason_counts": {"liq_under": 23, "age_too_young": 14, "top10_over": 19, "holders_under": 7, "vol_liq_ratio_under": 3}}
 {"ts_utc": "2026-09-05T22:02:18+00:00", "chain": "solana", "universe_size": 26, "survivors": 1, "failed": 25, "reason_counts": {"liq_under": 23, "age_too_young": 13, "top10_over": 17, "holders_under": 6, "vol_liq_ratio_under": 1}}
+{"ts_utc": "2026-09-06T04:27:29+00:00", "chain": "solana", "universe_size": 28, "survivors": 1, "failed": 27, "reason_counts": {"liq_under": 27, "age_too_young": 15, "top10_over": 19, "holders_under": 9, "vol_liq_ratio_under": 1}}
