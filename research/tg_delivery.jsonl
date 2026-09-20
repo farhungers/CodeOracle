@@ -256,3 +256,5 @@
 {"sent_ts_utc": "2026-09-20T18:43:19+00:00", "signal_id": "E1-SOL-20260920T184303Z-fomopay", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-20T18:43:19+00:00", "signal_id": "E1-SOL-20260920T184303Z-baton", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-20T18:43:19+00:00", "signal_id": "E1d-SOL-20260920T184303Z-baton", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-20T22:23:12+00:00", "signal_id": "E1-SOL-20260920T222255Z-jeanjak", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-20T22:23:13+00:00", "signal_id": "E1-SOL-20260920T130120Z-tigrino:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
