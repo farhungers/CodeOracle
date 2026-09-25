@@ -306,3 +306,9 @@
 {"sent_ts_utc": "2026-09-25T13:39:49+00:00", "signal_id": "E1-SOL-20260925T133936Z-uptober", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-25T13:39:49+00:00", "signal_id": "E1d-SOL-20260925T133936Z-brain", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-25T13:39:49+00:00", "signal_id": "E1-SOL-20260925T044733Z-holdoween:resolution:TP1", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1-SOL-20260925T195944Z-go", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1d-SOL-20260925T195944Z-go", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1e-SOL-20260925T195944Z-go", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1-SOL-20260925T133936Z-brain:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1-SOL-20260925T133936Z-uptober:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-09-25T20:00:03+00:00", "signal_id": "E1d-SOL-20260925T133936Z-brain:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
