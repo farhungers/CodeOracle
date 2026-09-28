@@ -29,3 +29,5 @@
 {"ts_utc": "2026-09-28T05:14:16+00:00", "chain": "solana", "token_addr": "92BVgXufGjaMUyANA97dvg8LqNb5VMg2wgRfve9tPdCG", "liq_usd": 64743.14, "vol_24h_usd": 1730707.38, "holder_count": 1000, "top10_pct": 0.3135065102740527}
 {"ts_utc": "2026-09-28T05:14:16+00:00", "chain": "solana", "token_addr": "6UhUkSBc9RBB9gVJcjCWtcQv4t771rQF7bdn2qK7pump", "liq_usd": 91946.38, "vol_24h_usd": 3238233.47, "holder_count": 1000, "top10_pct": 0.2061678009160825}
 {"ts_utc": "2026-09-28T05:14:16+00:00", "chain": "solana", "token_addr": "BxftAowY2dVa2h9KMqDTPk4oMxzU9k6uVbZuoorXpump", "liq_usd": 81469.54, "vol_24h_usd": 285856.44, "holder_count": 1000, "top10_pct": 0.2658665605399728}
+{"ts_utc": "2026-09-28T16:43:14+00:00", "chain": "solana", "token_addr": "FFzTy32bZbPA8zRLbbiWoNzW2emGv86tUxaoqhz1pump", "liq_usd": 79634.37, "vol_24h_usd": 5539590.03, "holder_count": 1000, "top10_pct": 0.0913260992007434}
+{"ts_utc": "2026-09-28T16:43:14+00:00", "chain": "solana", "token_addr": "BxftAowY2dVa2h9KMqDTPk4oMxzU9k6uVbZuoorXpump", "liq_usd": 91165.58, "vol_24h_usd": 242480.22, "holder_count": 1000, "top10_pct": 0.25940830340628146}
