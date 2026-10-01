@@ -357,3 +357,5 @@
 {"sent_ts_utc": "2026-09-30T20:46:11+00:00", "signal_id": "E1-SOL-20260930T145245Z-airpad:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-30T20:46:11+00:00", "signal_id": "E1-SOL-20260930T145245Z-ss:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-09-30T20:46:11+00:00", "signal_id": "E1d-SOL-20260930T145245Z-airpad:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-01T05:41:58+00:00", "signal_id": "E1-SOL-20261001T054138Z-holdoween", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-01T05:41:58+00:00", "signal_id": "E1d-SOL-20261001T054138Z-holdoween", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
