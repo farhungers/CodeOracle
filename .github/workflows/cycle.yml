@@ -40,6 +40,13 @@ jobs:
           # after first funnel telemetry showed 96% of candidates fail at $100k.
           # See research/addendum_v1_3_liq_floor.md for cohort semantics.
           GATE_LIQ_MIN_USD: "50000"
+          # 2026-10-02 PARK: both edges failed pre-reg promotion test. E1 at n=30
+          # on 2026-08-28 (ship=0.200, median R=-1.00, cum=-10.67R); E1d at n=30
+          # on 2026-09-10 (ship=0.133, median R=-1.00, cum=-17.11R). Current drawdowns
+          # -53.4R / -36.2R. See research/retro_E1_shadow.md and retro_E1d_shadow.md.
+          # Open signals continue to resolve; emission is halted. Re-eval only via v=2 pre-reg.
+          EDGE_E1_DISABLED: "true"
+          EDGE_E1D_DISABLED: "true"
         run: python scripts/run_scan_solana.py
 
       - name: Resolver
