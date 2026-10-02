@@ -62,6 +62,7 @@ def snapshot_universe(states: Iterable, path: Path, now: Optional[datetime] = No
                 "vol_24h_usd": s.vol_24h_usd,
                 "holder_count": s.holder_count,
                 "top10_pct": s.top10_pct,
+                "dev_wallet_pct": getattr(s, "dev_wallet_pct", None),
             }
             f.write(json.dumps(row) + "\n")
             written += 1

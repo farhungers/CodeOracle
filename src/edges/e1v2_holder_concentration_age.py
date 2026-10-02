@@ -114,4 +114,7 @@ def _card_extras(s: Any) -> dict[str, Any]:
         "mcap_usd": s.mcap_usd,
         "buys_h24": s.buys_h24,
         "sells_h24": s.sells_h24,
+        # Telemetry only — captured at emission for retro analysis.
+        "dev_wallet_pct": getattr(s, "dev_wallet_pct", None),
+        "update_authority": getattr(s, "update_authority", None),
     }

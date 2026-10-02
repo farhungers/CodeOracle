@@ -50,6 +50,11 @@ class TokenState:
     # Helius enrichment (SOL only; None until enrich_solana runs)
     top10_pct: float | None = None
     holder_count: int | None = None
+    # Dev-wallet heuristic (SOL only; TELEMETRY ONLY — not a gate at any version).
+    # Proxy = metadata update-authority balance / total supply. None = unknown
+    # (authority burned, RPC failure, or supply missing). See HeliusClient.dev_wallet_info.
+    dev_wallet_pct: float | None = None
+    update_authority: str | None = None
     # Bitget cross-listing (None until apply_bitget_crosslisting runs)
     # True = token is on Bitget spot/futures -> Pythia's turf, we skip
     crosslisted: bool | None = None
@@ -201,6 +206,14 @@ def enrich_solana(
                 continue
             s.top10_pct = info.top10_pct
             s.holder_count = info.holder_count
+            # Dev-wallet telemetry (TELEMETRY ONLY — not a gate at any version).
+            # Failure here does not block top10/holders enrichment above.
+            try:
+                dw = helius.dev_wallet_info(s.token_addr, supply=info.supply_absolute)
+                s.dev_wallet_pct = dw.dev_pct
+                s.update_authority = dw.update_authority
+            except Exception as e:
+                log.warning("helius dev_wallet_info %s failed: %s", s.token_addr, e)
     finally:
         if own:
             helius.close()
