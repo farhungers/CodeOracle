@@ -1,0 +1,3 @@
+# Pin frozen pre-reg files to LF so SHA-256 verification is reproducible
+# across platforms (addendum v1.2 convention — see pre_reg_E1_v2.md sha256_recipe).
+research/pre_reg_*.md text eol=lf
