@@ -370,3 +370,4 @@
 {"sent_ts_utc": "2026-10-03T13:19:06+00:00", "signal_id": "E1-SOL-20260930T052425Z-pumpoween:resolution:EXPIRED", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-03T19:11:09+00:00", "signal_id": "E1V2-SOL-20261003T050913Z-holdoween:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-03T19:11:09+00:00", "signal_id": "E1V2-SOL-20261003T050913Z-si:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-04T05:43:12+00:00", "signal_id": "E1V2-SOL-20261003T131845Z-hi:resolution:TP1", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
