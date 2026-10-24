@@ -450,3 +450,4 @@
 {"sent_ts_utc": "2026-10-23T19:56:02+00:00", "signal_id": "E1V2-SOL-20261022T231618Z-pepper:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-23T19:56:02+00:00", "signal_id": "E1V2-SOL-20261023T131952Z-exfil:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-24T12:37:51+00:00", "signal_id": "E1V2-SOL-20261023T195540Z-hell:resolution:TP1", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-24T22:25:28+00:00", "signal_id": "E1V2-SOL-20261021T200430Z-larpcheck:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
