@@ -460,3 +460,5 @@
 {"sent_ts_utc": "2026-10-26T20:59:59+00:00", "signal_id": "E1V2-SOL-20261026T205934Z-remus", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-27T04:53:51+00:00", "signal_id": "E1V2-SOL-20261026T205934Z-remus:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-10-27T20:38:10+00:00", "signal_id": "E1V2-SOL-20261027T203745Z-doas", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-28T05:28:45+00:00", "signal_id": "E1V2-SOL-20261028T052822Z-remus", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-10-28T05:28:46+00:00", "signal_id": "E1V2-SOL-20261027T203745Z-doas:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
