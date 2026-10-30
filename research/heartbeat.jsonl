@@ -737,3 +737,5 @@
 {"ts_utc": "2026-10-29T15:11:01+00:00", "task": "resolver_solana", "new_resolutions": 1, "tg_delivered": 0}
 {"ts_utc": "2026-10-29T21:02:07+00:00", "task": "scan_solana", "universe": 52, "survivors": 1, "signals_emitted": 0, "tg_delivered": 0}
 {"ts_utc": "2026-10-29T21:02:07+00:00", "task": "resolver_solana", "new_resolutions": 1, "tg_delivered": 0}
+{"ts_utc": "2026-10-30T05:36:16+00:00", "task": "scan_solana", "universe": 56, "survivors": 3, "signals_emitted": 0, "tg_delivered": 0}
+{"ts_utc": "2026-10-30T05:36:16+00:00", "task": "resolver_solana", "new_resolutions": 0, "tg_delivered": 0}
