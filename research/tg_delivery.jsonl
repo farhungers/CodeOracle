@@ -499,3 +499,5 @@
 {"sent_ts_utc": "2026-11-04T00:34:14+00:00", "signal_id": "E1V2-SOL-20261103T192634Z-ahsoka:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-11-04T12:00:50+00:00", "signal_id": "E1V2-SOL-20261104T120028Z-si276", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
 {"sent_ts_utc": "2026-11-04T12:00:50+00:00", "signal_id": "E1V2-SOL-20261102T181316Z-dessa:resolution:SL", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-11-04T19:42:04+00:00", "signal_id": "E1e-SOL-20261104T194137Z-float", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
+{"sent_ts_utc": "2026-11-04T19:42:04+00:00", "signal_id": "E1V2-SOL-20261104T194137Z-float", "chat_id": "", "message_id": null, "mode": "SHADOW", "ok": false, "error": "no_chat_id", "dry_run": false}
